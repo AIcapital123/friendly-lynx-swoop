@@ -19,6 +19,10 @@ export default {
     },
     extend: {
       colors: {
+        gokapital: {
+          green: "#00A79D",
+          blue: "#005DAA",
+        },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",

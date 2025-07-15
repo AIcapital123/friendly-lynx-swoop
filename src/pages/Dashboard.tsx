@@ -1,3 +1,5 @@
+import { useState } from "react";
+import { z } from "zod";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import {
   Card,
@@ -6,92 +8,73 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { CommissionForm, commissionSchema } from "@/components/CommissionForm";
+import { DealPipelineTable } from "@/components/DealPipelineTable";
+import { Commission } from "@/types";
+
+const initialCommissions: Commission[] = [
+  {
+    id: '1',
+    loanAmount: 350000,
+    loanType: 'conventional',
+    lender: 'Major Bank Corp',
+    commission: 3500,
+    broker: 'John Doe',
+    brokerCommission: 1750,
+    processingFees: 500,
+    fundedDate: new Date('2024-07-15'),
+  },
+  {
+    id: '2',
+    loanAmount: 500000,
+    loanType: 'jumbo',
+    lender: 'Prestige Lenders',
+    commission: 5000,
+    processingFees: 750,
+    fundedDate: new Date('2024-07-20'),
+  },
+];
+
 
 const Dashboard = () => {
+  const [commissions, setCommissions] = useState<Commission[]>(initialCommissions);
+
+  function handleAddCommission(data: z.infer<typeof commissionSchema>) {
+    const newCommission: Commission = {
+      id: new Date().toISOString(),
+      ...data,
+    };
+    setCommissions((prev) => [newCommission, ...prev]);
+  }
+
   return (
     <DashboardLayout>
       <div className="flex flex-col gap-4 md:gap-8">
-        {/* Quick Stats Row */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Total Gross Commissions
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">$0.00</div>
-              <p className="text-xs text-muted-foreground">Awaiting data...</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Pending Payments
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">$0.00</div>
-              <p className="text-xs text-muted-foreground">Awaiting data...</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">MTD Net</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">$0.00</div>
-              <p className="text-xs text-muted-foreground">Awaiting data...</p>
-            </CardContent>
-          </Card>
-        </div>
-
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-7">
-          {/* Commission Entry Form */}
           <Card className="lg:col-span-3">
             <CardHeader>
               <CardTitle>Commission Entry</CardTitle>
               <CardDescription>
-                Add a new commission record.
+                Add a new commission record manually.
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-muted-foreground">
-                Commission entry form will be implemented here.
-              </p>
+              <CommissionForm onSubmit={handleAddCommission} />
             </CardContent>
           </Card>
 
-          {/* Monthly Performance Graph */}
           <Card className="lg:col-span-4">
             <CardHeader>
-              <CardTitle>Monthly Performance</CardTitle>
+              <CardTitle>MTD Deal Pipeline</CardTitle>
               <CardDescription>
-                Gross vs Net by Loan Type
+                Deals funded in the current month.
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-muted-foreground">
-                Monthly performance graph will be implemented here.
-              </p>
+              <DealPipelineTable commissions={commissions} />
             </CardContent>
           </Card>
         </div>
-
-        {/* Recent Commissions Table */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent Commissions</CardTitle>
-            <CardDescription>
-              A list of the most recent commission records.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">
-              Recent commissions table will be implemented here.
-            </p>
-          </CardContent>
-        </Card>
       </div>
     </DashboardLayout>
   );
