@@ -2,13 +2,14 @@ import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, LayoutDashboard, DollarSign, CreditCard, Building } from "lucide-react";
+import { Menu, LayoutDashboard, DollarSign, CreditCard, Building, Landmark } from "lucide-react";
 import { MadeWithDyad } from "./made-with-dyad";
 
 const navigation = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
   { name: "Commissions", href: "/commissions", icon: DollarSign },
   { name: "Expenses", href: "/expenses", icon: CreditCard },
+  { name: "Bank Sync", href: "/bank-sync", icon: Landmark },
 ];
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
