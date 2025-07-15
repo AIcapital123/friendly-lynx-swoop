@@ -6,6 +6,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { Commission } from "@/types";
 
 type DealPipelineTableProps = {
@@ -19,41 +25,56 @@ const formatCurrency = (amount: number) => {
   }).format(amount);
 };
 
+const TableHeadWithTooltip = ({ label, tooltip }: { label: string; tooltip: string }) => (
+  <TableHead>
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger className="flex items-center gap-1.5">{label}</TooltipTrigger>
+        <TooltipContent>
+          <p>{tooltip}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  </TableHead>
+);
+
 export function DealPipelineTable({ commissions }: DealPipelineTableProps) {
   return (
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead>Funded Date</TableHead>
-          <TableHead>Loan Amount</TableHead>
+          <TableHead>Client Name</TableHead>
+          <TableHeadWithTooltip label="Loan Amount" tooltip="The total amount of the loan." />
           <TableHead>Loan Type</TableHead>
           <TableHead>Lender</TableHead>
-          <TableHead>Commission</TableHead>
+          <TableHeadWithTooltip label="Commission" tooltip="Total commission received for this deal." />
           <TableHead>Broker</TableHead>
-          <TableHead>Broker Commission</TableHead>
-          <TableHead>Processing Fees</TableHead>
+          <TableHeadWithTooltip label="Broker Comm." tooltip="Commission paid to the broker." />
+          <TableHead>Proc. Fees</TableHead>
+          <TableHead>Funded Date</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
         {commissions.length === 0 ? (
           <TableRow>
-            <TableCell colSpan={8} className="h-24 text-center">
+            <TableCell colSpan={9} className="h-24 text-center">
               No commission data available.
             </TableCell>
           </TableRow>
         ) : (
           commissions.map((c) => (
             <TableRow key={c.id}>
-              <TableCell>{c.fundedDate.toLocaleDateString()}</TableCell>
+              <TableCell className="font-medium">{c.clientName}</TableCell>
               <TableCell>{formatCurrency(c.loanAmount)}</TableCell>
               <TableCell className="capitalize">{c.loanType}</TableCell>
               <TableCell>{c.lender}</TableCell>
-              <TableCell>{formatCurrency(c.commission)}</TableCell>
+              <TableCell className="text-gokapital-green font-semibold">{formatCurrency(c.commission)}</TableCell>
               <TableCell>{c.broker || "N/A"}</TableCell>
               <TableCell>
                 {c.brokerCommission ? formatCurrency(c.brokerCommission) : "N/A"}
               </TableCell>
               <TableCell>{formatCurrency(c.processingFees)}</TableCell>
+              <TableCell>{c.fundedDate.toLocaleDateString()}</TableCell>
             </TableRow>
           ))
         )}

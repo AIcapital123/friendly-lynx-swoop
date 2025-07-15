@@ -24,14 +24,23 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { showSuccess } from "@/utils/toast";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export const commissionSchema = z.object({
+  clientName: z.string().min(1, "Client name is required"),
   loanAmount: z.coerce.number().min(1000, "Loan amount must be at least $1,000"),
-  loanType: z.enum(["conventional", "fha", "va", "jumbo", "commercial"]),
+  loanType: z.enum(["conventional", "fha", "va", "jumbo", "commercial"], {
+    required_error: "You need to select a loan type.",
+  }),
   lender: z.string().min(1, "Lender name is required"),
   commission: z.coerce.number().min(0, "Commission cannot be negative"),
   broker: z.string().optional(),
@@ -44,16 +53,29 @@ type CommissionFormProps = {
   onSubmit: (data: z.infer<typeof commissionSchema>) => void;
 };
 
+const FormLabelWithTooltip = ({ label, tooltip }: { label: string; tooltip: string }) => (
+  <div className="flex items-center gap-1.5">
+    <FormLabel>{label}</FormLabel>
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Info className="h-3 w-3 text-muted-foreground" />
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>{tooltip}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  </div>
+);
+
 export function CommissionForm({ onSubmit }: CommissionFormProps) {
   const form = useForm<z.infer<typeof commissionSchema>>({
     resolver: zodResolver(commissionSchema),
     defaultValues: {
-      loanAmount: 1000,
+      clientName: "",
       lender: "",
-      commission: 0,
       broker: "",
-      brokerCommission: 0,
-      processingFees: 0,
     },
   });
 
@@ -66,13 +88,26 @@ export function CommissionForm({ onSubmit }: CommissionFormProps) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-4">
+        <FormField
+          control={form.control}
+          name="clientName"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Client Name</FormLabel>
+              <FormControl>
+                <Input placeholder="John Smith" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
             control={form.control}
             name="loanAmount"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Loan Amount</FormLabel>
+                <FormLabelWithTooltip label="Loan Amount" tooltip="The total amount of the loan." />
                 <FormControl>
                   <Input type="number" placeholder="350000" {...field} />
                 </FormControl>
@@ -123,7 +158,7 @@ export function CommissionForm({ onSubmit }: CommissionFormProps) {
           name="commission"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Commission</FormLabel>
+              <FormLabelWithTooltip label="Commission" tooltip="Total commission received for this deal." />
               <FormControl>
                 <Input type="number" placeholder="3500" {...field} />
               </FormControl>
@@ -139,7 +174,7 @@ export function CommissionForm({ onSubmit }: CommissionFormProps) {
               <FormItem>
                 <FormLabel>Broker (Optional)</FormLabel>
                 <FormControl>
-                  <Input placeholder="John Doe" {...field} />
+                  <Input placeholder="Jane Doe" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -150,7 +185,7 @@ export function CommissionForm({ onSubmit }: CommissionFormProps) {
             name="brokerCommission"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Broker Commission (Optional)</FormLabel>
+                <FormLabelWithTooltip label="Broker Commission" tooltip="Portion of the commission paid to the broker." />
                 <FormControl>
                   <Input type="number" placeholder="1750" {...field} />
                 </FormControl>
@@ -177,7 +212,7 @@ export function CommissionForm({ onSubmit }: CommissionFormProps) {
             control={form.control}
             name="fundedDate"
             render={({ field }) => (
-              <FormItem className="flex flex-col">
+              <FormItem className="flex flex-col pt-2">
                 <FormLabel>Funded Date</FormLabel>
                 <Popover>
                   <PopoverTrigger asChild>
